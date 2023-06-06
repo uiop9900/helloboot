@@ -6,6 +6,7 @@ import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 
@@ -29,17 +30,28 @@ public class HellobootApplication {
 //		new Tomcat().start(); -> 많은 설정값들이 존재해서 임베디드 tomcat을 직접 띄우는 건 쉽지않다.
 		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory(); // factory: tomcat사용을 도와주는 도우미 역할
 		WebServer webServer = serverFactory.getWebServer(servletContext -> { // funtional Interface -> lamda로 대체 가능
-			servletContext.addServlet("hello", new HttpServlet() { // servlet을 등록
+			HelloController helloController = new HelloController();
+
+			servletContext.addServlet("frontController", new HttpServlet() {
 				@Override
 				protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-					// 동적 body 만들기
-					String name = req.getParameter("name");
+					// 인증, 보안, 다국어, 공통기능
+					// 기존 servlet Container에서 매핑하던걸 이제는 fronController에서 매핑해야한다.
+					if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
+						String name = req.getParameter("name");
 
-					resp.setStatus(HttpStatus.OK.value()); // 상태코드
-					resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // header
-					resp.getWriter().println("Hello " + name); // body
+						String ret = helloController.hello(name); // 바인딩: 직적으로 웹요청과 응답을 다루는것들을 넣지 않고 String(java Type)으로 변환해서 넣어준다.
+
+						resp.setStatus(HttpStatus.OK.value()); // 상태코드
+						resp.setHeader(HttpHeaders.CONTENT_TYPE, MediaType.TEXT_PLAIN_VALUE); // header
+						resp.getWriter().println(ret); // body
+					} else if (req.getRequestURI().equals("/users")) {
+
+					} else {
+						resp.setStatus(HttpStatus.NOT_FOUND.value());
+					}
 				}
-			}).addMapping("/hello"); // 해당 url에 이 servlet을 매핑한다.
+			}).addMapping("/*"); // 모든 요청을 받아서 공통처리 부분을 실행한다(AOP?)
 
 		});
 		webServer.start();
