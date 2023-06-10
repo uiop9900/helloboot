@@ -30,13 +30,14 @@ public class HellobootApplication {
 	 */
 
 	public static void main(String[] args) {
+		// spring container 만든다.
 		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
-
 		applicationContext.registerBean(HelloController.class);
 		applicationContext.registerBean(SimpleHelloService.class);
-
 		applicationContext.refresh();
 
+
+		// servlet container를 만들어서 servlet을 등록한다.
 		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 		WebServer webServer = serverFactory.getWebServer(servletContext -> {
 
