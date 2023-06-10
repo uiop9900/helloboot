@@ -1,6 +1,7 @@
 package tobyspring.helloboot;
 
 
+import org.springframework.boot.SpringApplication;
 import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactory;
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
@@ -26,7 +27,7 @@ public class HellobootApplication {
 
 	// 최초 spring boot가 만들어주는 main method왇 동일하다.
 	public static void main(String[] args) {
-		MySpringApplication.run(HellobootApplication.class, args);
+		SpringApplication.run(HellobootApplication.class, args);
 	}
 
 }
