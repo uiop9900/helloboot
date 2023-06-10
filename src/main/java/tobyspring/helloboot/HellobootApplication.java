@@ -30,23 +30,28 @@ public class HellobootApplication {
 	 */
 
 	public static void main(String[] args) {
-		// spring container 만든다.
-		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
+		// spring container가 초기화되는 시점에 Servelt contianer를 만든다.
+
+		// spring container 만들고 bean 등록 후 초기화한다.
+		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext() {
+			@Override
+			protected void onRefresh() {
+				super.onRefresh();
+
+				// servlet container를 만들어서 frontController 역할의 servlet을 등록한다.
+				ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
+				WebServer webServer = serverFactory.getWebServer(servletContext -> {
+
+					servletContext.addServlet("dispatcherServlet",
+									new DispatcherServlet(this))
+							.addMapping("/*");
+				});
+				webServer.start();
+			}
+		};
 		applicationContext.registerBean(HelloController.class);
 		applicationContext.registerBean(SimpleHelloService.class);
 		applicationContext.refresh();
-
-
-		// servlet container를 만들어서 servlet을 등록한다.
-		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
-		WebServer webServer = serverFactory.getWebServer(servletContext -> {
-
-			servletContext.addServlet("dispatcherServlet",
-					new DispatcherServlet(applicationContext)) // web에서 사용하기 위한 Servlet이라 ApplicationContext도 web으로 확장한다.
-					.addMapping("/*");
-		});
-		webServer.start();
-		// 요청은 받았으나 해당 요청을 어디로 보낼지를 몰라서 404에러가 났다.
 	}
 
 }
