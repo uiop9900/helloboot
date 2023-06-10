@@ -1,12 +1,17 @@
 package tobyspring.helloboot;
 
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.bind.annotation.RestController;
+import java.util.Objects;
 
-public class HelloController { // fromController에서 받아서 사용한다.
+public class HelloController {
+    // helloService interface를 선언해서 생성자 주입받는다.
+
+    private final HelloService helloService;
+
+    public HelloController(HelloService helloService) {
+        this.helloService = helloService;
+    }
 
     public String hello(String name) {
-        return "hello" + name;
+        return helloService.sayHello(Objects.requireNonNull(name));
     }
 }

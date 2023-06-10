@@ -28,14 +28,14 @@ public class HellobootApplication {
 	 */
 
 	public static void main(String[] args) {
-		//spring container 생성 -> Application Context -> 사용하기 쉽게 존재하는 GenericApplicationContext
 		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		// spring에서는 class 정보를 넘겨서 bean 을 등록하는 방식을 많이 쓴다.
-		// Servlet 에서는 servlet을 만들어서 add 하는 방식이었다.
-		applicationContext.registerBean(HelloController.class); // metadata를 넣어줬고
-		// 이제 spring container가 가지가 가진 metadata들로 초기화 해서 bean들을 올리는데
-		applicationContext.refresh();
+		// 하지만 Controller 에서는 interface를 주입받았는데 어떻게 알아서 구현클래스를 넣어주는가?
+		// Spring container가 해당 interface를 구현한 class들을 찾아서 알아서 넣어준다.
+		// 그렇다면 생성순서가 중요하겠다? -> Controller가 먼저 생성되고 service가 생성되어야 한다. -> 이건 Spring이 알아서 순서대로 생성한다.
+		applicationContext.registerBean(HelloController.class);
+		applicationContext.registerBean(SimpleHelloService.class);
 
+		applicationContext.refresh();
 
 		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 		WebServer webServer = serverFactory.getWebServer(servletContext -> {
