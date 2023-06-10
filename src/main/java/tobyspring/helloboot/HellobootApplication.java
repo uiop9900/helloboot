@@ -10,6 +10,8 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.web.context.support.GenericWebApplicationContext;
+import org.springframework.web.servlet.DispatcherServlet;
 
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
@@ -28,10 +30,8 @@ public class HellobootApplication {
 	 */
 
 	public static void main(String[] args) {
-		GenericApplicationContext applicationContext = new GenericApplicationContext();
-		// 하지만 Controller 에서는 interface를 주입받았는데 어떻게 알아서 구현클래스를 넣어주는가?
-		// Spring container가 해당 interface를 구현한 class들을 찾아서 알아서 넣어준다.
-		// 그렇다면 생성순서가 중요하겠다? -> Controller가 먼저 생성되고 service가 생성되어야 한다. -> 이건 Spring이 알아서 순서대로 생성한다.
+		GenericWebApplicationContext applicationContext = new GenericWebApplicationContext();
+
 		applicationContext.registerBean(HelloController.class);
 		applicationContext.registerBean(SimpleHelloService.class);
 
@@ -40,27 +40,12 @@ public class HellobootApplication {
 		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
 		WebServer webServer = serverFactory.getWebServer(servletContext -> {
 
-			servletContext.addServlet("frontController", new HttpServlet() {
-				@Override
-				protected void service(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
-					// 인증, 보안, 다국어, 공통기능
-					if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
-						String name = req.getParameter("name");
-
-						HelloController helloController = applicationContext.getBean(HelloController.class);
-						String ret = helloController.hello(name);
-
-						resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
-						resp.getWriter().println(ret); // body
-					} else {
-						resp.setStatus(HttpStatus.NOT_FOUND.value());
-					}
-				}
-			}).addMapping("/*"); // 모든 요청을 받아서 공통처리 부분을 실행한다(AOP?)
-
+			servletContext.addServlet("dispatcherServlet",
+					new DispatcherServlet(applicationContext)) // web에서 사용하기 위한 Servlet이라 ApplicationContext도 web으로 확장한다.
+					.addMapping("/*");
 		});
 		webServer.start();
-
+		// 요청은 받았으나 해당 요청을 어디로 보낼지를 몰라서 404에러가 났다.
 	}
 
 }
