@@ -5,6 +5,7 @@ import org.springframework.boot.web.embedded.tomcat.TomcatServletWebServerFactor
 import org.springframework.boot.web.server.WebServer;
 import org.springframework.boot.web.servlet.ServletContextInitializer;
 import org.springframework.boot.web.servlet.server.ServletWebServerFactory;
+import org.springframework.context.support.GenericApplicationContext;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -27,10 +28,17 @@ public class HellobootApplication {
 	 */
 
 	public static void main(String[] args) {
-//		new Tomcat().start(); -> 많은 설정값들이 존재해서 임베디드 tomcat을 직접 띄우는 건 쉽지않다.
-		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory(); // factory: tomcat사용을 도와주는 도우미 역할
-		WebServer webServer = serverFactory.getWebServer(servletContext -> { // funtional Interface -> lamda로 대체 가능
-			HelloController helloController = new HelloController();
+		//spring container 생성 -> Application Context -> 사용하기 쉽게 존재하는 GenericApplicationContext
+		GenericApplicationContext applicationContext = new GenericApplicationContext();
+		// spring에서는 class 정보를 넘겨서 bean 을 등록하는 방식을 많이 쓴다.
+		// Servlet 에서는 servlet을 만들어서 add 하는 방식이었다.
+		applicationContext.registerBean(HelloController.class); // metadata를 넣어줬고
+		// 이제 spring container가 가지가 가진 metadata들로 초기화 해서 bean들을 올리는데
+		applicationContext.refresh();
+
+
+		ServletWebServerFactory serverFactory = new TomcatServletWebServerFactory();
+		WebServer webServer = serverFactory.getWebServer(servletContext -> {
 
 			servletContext.addServlet("frontController", new HttpServlet() {
 				@Override
@@ -39,6 +47,7 @@ public class HellobootApplication {
 					if (req.getRequestURI().equals("/hello") && req.getMethod().equals(HttpMethod.GET.name())) {
 						String name = req.getParameter("name");
 
+						HelloController helloController = applicationContext.getBean(HelloController.class);
 						String ret = helloController.hello(name);
 
 						resp.setContentType(MediaType.TEXT_PLAIN_VALUE);
