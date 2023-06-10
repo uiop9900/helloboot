@@ -1,5 +1,8 @@
 package tobyspring.helloboot;
 
+import org.springframework.beans.BeansException;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,18 +14,20 @@ import java.util.Objects;
 
 @RestController
 public class HelloController {
-    // helloService interface를 선언해서 생성자 주입받는다.
 
     private final HelloService helloService;
+    private final ApplicationContext applicationContext;
 
-    public HelloController(HelloService helloService) {
+    public HelloController(HelloService helloService, ApplicationContext applicationContext) {
         this.helloService = helloService;
+        this.applicationContext = applicationContext;
+
+        System.out.println(applicationContext);
     }
 
-    // 여기서 mapping을 하게 되면 DispatcherServlet이 class단위, method단위로 뒤져서 맞는 bean을 찾아낸다.
-    // 이때 class 단위로 먼저 찾기때문에 class에도 annotation을 붙인다.
     @GetMapping("/hello")
     public String hello(String name) {
         return helloService.sayHello(Objects.requireNonNull(name));
     }
+
 }
