@@ -7,7 +7,7 @@ public class HelloControllerTest {
     // helloController만을 테스트 하고싶은데, Service에 의존관계가 있다. 고립화시켜서 테스트한다.
     @Test
     void helloController() {
-        HelloController helloController = new HelloController(name -> name); // 여기에서 service를 생성해 반환값을 정의한다. -> service와 무관하게 controller를 고립시킬수있다.
+        HelloController helloController = new HelloController(name -> name); // 여기에서 service를 생성해 반환값을 정의한다. -> service와 무관하게 controller를 고립시킬수있다. == Stub
 
         String res = helloController.hello("test");
 
