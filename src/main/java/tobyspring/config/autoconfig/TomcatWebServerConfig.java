@@ -8,7 +8,7 @@ import tobyspring.config.MyAutoConfiguration;
 
 @MyAutoConfiguration // import에 정의한 config라 명시 + @configuration
 public class TomcatWebServerConfig {
-    @Bean
+    @Bean("tomcatWebServerFactory")
     public ServletWebServerFactory servletWebServerFactory() {
         return new TomcatServletWebServerFactory();
     }
