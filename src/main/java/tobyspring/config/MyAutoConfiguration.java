@@ -9,6 +9,6 @@ import java.lang.annotation.Target;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Target(ElementType.TYPE)
-@Configuration
+@Configuration(proxyBeanMethods = false) // true(default) -> false , false: 프록시 객체를 생성하지 않는다.
 public @interface MyAutoConfiguration {
 }
